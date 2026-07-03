@@ -1,0 +1,19 @@
+{
+  "name": "egw-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scripts de orquestación local para la plataforma EGW (multi-repo)",
+  "packageManager": "pnpm@10.24.0",
+  "scripts": {
+    "setup": "pnpm setup:install && pnpm setup:db",
+    "setup:install": "pnpm --dir ../egw-api install && pnpm --dir ../egw-admin install && pnpm --dir ../egw-mobile install",
+    "setup:db": "pnpm --dir ../egw-api prisma:migrate:dev && pnpm --dir ../egw-api prisma:seed:dev",
+    "dev:all": "concurrently -k -n api,admin,mobile -c blue,green,magenta \"pnpm --dir ../egw-api dev\" \"pnpm --dir ../egw-admin dev\" \"pnpm --dir ../egw-mobile start:dev\"",
+    "dev:api": "pnpm --dir ../egw-api dev",
+    "dev:admin": "pnpm --dir ../egw-admin dev",
+    "dev:mobile": "pnpm --dir ../egw-mobile start:dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

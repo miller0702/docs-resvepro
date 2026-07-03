@@ -1,0 +1,27 @@
+---
+description: Convenciones al editar OpenAPI y docs de API
+globs: openapi.yaml,API.md,ARCHITECTURE.md,DATABASE.md,ROLES.md
+alwaysApply: false
+---
+
+# Contrato API y documentación
+
+## Formato de respuesta REST
+
+```json
+{ "data": {} }
+{ "data": [], "meta": { "total", "page", "limit", "totalPages" } }
+```
+
+Errores: `{ statusCode, message, error, timestamp, path }`
+
+## Reglas
+
+- Prefijo `/api/v1`; breaking changes → planificar `/api/v2`
+- Paginación: `page` (default 1), `limit` (default 20, max 100)
+- Auth pública: register, login, refresh, forgot/reset password
+- Endpoints protegidos: `Authorization: Bearer <token>`
+- **Listados de libros** (`GET /books`): metadatos ligeros; no incluir `media_assets.data`. Detalle en `GET /books/{id}`. Batch con `ids` (máx. 100).
+- **Estado de estudio en biblioteca**: `GET /study/book-ids` (solo IDs); listados completos en `/study/notes` y `/study/highlights`.
+
+Al modificar `openapi.yaml`, verifica que egw-api, egw-admin y egw-mobile sigan alineados.

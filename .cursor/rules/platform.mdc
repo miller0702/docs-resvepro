@@ -1,0 +1,31 @@
+---
+description: Contexto EGW multi-repo y reglas de documentación
+alwaysApply: true
+---
+
+# egw-docs — plataforma EGW Writings
+
+Este repo es la **fuente de verdad** del diseño (Plan Plata MVP). No contiene código ejecutable.
+
+## Repos hermanos
+
+| Repo | Stack |
+|------|-------|
+| egw-api | NestJS 11 + Prisma + PostgreSQL |
+| egw-admin | React 19 + Vite + Tailwind |
+| egw-mobile | Expo SDK 54 + SQLite offline |
+
+## Sincronización obligatoria
+
+- Endpoint nuevo o cambiado → `openapi.yaml` + `API.md` + implementación en egw-api
+- Schema DB → `DATABASE.md` + `prisma/schema.prisma` en egw-api
+- Roles/permisos → `ROLES.md`
+- Puertos/config → `ENV.md` + `development.ts` / `production.ts` de cada repo
+
+## Constantes de desarrollo
+
+- API: `http://localhost:8000/api/v1` (puerto 8000)
+- Admin: puerto 8002 | Mobile Metro: puerto 8003
+- pnpm en api, admin y mobile | JWT Bearer | UUID v4 | sin i18n en Plata
+
+Consulta [AGENTS.md](../AGENTS.md) para el mapa completo de documentos.
