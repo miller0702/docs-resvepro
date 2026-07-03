@@ -58,9 +58,48 @@ Desde la carpeta padre `EGW/`: mismos comandos vía `pnpm dev:all` (delega en do
 | `pnpm prisma:migrate:dev` | `pnpm prisma:migrate:prod` |
 | `pnpm prisma:seed:dev` | `pnpm prisma:seed:prod` |
 
-### egw-admin
+**Cloud Run (GCP):** el `Dockerfile` usa **pnpm** (`pnpm-lock.yaml`), no npm. Al arrancar ejecuta `prisma migrate deploy` y luego la API.
 
-| `pnpm dev` | `pnpm build` |
+Variables mínimas en el servicio Cloud Run:
+
+| Variable | Ejemplo |
+|----------|---------|
+| `EGW_ENV` | `production` |
+| `DATABASE_URL` | URI Session pooler Supabase |
+| `MONGODB_URI` | Atlas `/resvepro` |
+| `JWT_SECRET` / `JWT_REFRESH_SECRET` | secretos fuertes |
+| `CORS_ORIGINS` | `https://resvepro.web.app,https://resvepro.firebaseapp.com` |
+
+Cloud Run inyecta `PORT` (normalmente `8080`); la API lo respeta automáticamente.
+
+### egw-admin (Firebase Hosting)
+
+| Comando | Descripción |
+|---------|-------------|
+| `pnpm dev` | Desarrollo local (:8002) |
+| `pnpm build` | Build estático → `dist/` |
+| `pnpm deploy:firebase` | Build + `firebase deploy --only hosting` |
+
+**Proyecto Firebase:** `resvepro` → **https://resvepro.web.app** (también `https://resvepro.firebaseapp.com`).
+
+El admin **no usa Firebase SDK** (auth, Firestore, etc.); solo Firebase **Hosting** para servir el build estático. La autenticación sigue siendo JWT vía la API NestJS.
+
+**Primera vez:**
+
+```bash
+cd resvepro-admin
+pnpm install
+pnpm exec firebase login
+pnpm exec firebase use resvepro
+cp env.production.example .env.production
+pnpm deploy:firebase
+```
+
+Si Hosting aún no está activo: [Firebase Console → resvepro → Hosting](https://console.firebase.google.com/project/resvepro/hosting) → **Comenzar**.
+
+> `pnpm deploy` es un comando reservado de pnpm; usa **`pnpm deploy:firebase`**.
+
+La API en Cloud Run debe incluir `https://resvepro.web.app` y `https://resvepro.firebaseapp.com` en `CORS_ORIGINS`.
 
 ### egw-mobile
 
@@ -86,9 +125,9 @@ Posts, comentarios y reacciones viven en **MongoDB** (Mongoose), no en PostgreSQ
 brew services start mongodb-community
 ```
 
-URI por defecto en `development.ts`: `mongodb://127.0.0.1:27017/egw_community`
+URI por defecto en `development.ts`: `mongodb://127.0.0.1:27017/resvepro`
 
-En producción, define `MONGODB_URI` en el entorno de despliegue o en `production.ts`.
+En producción, define `MONGODB_URI` con base de datos **`/resvepro`** (ej. `...mongodb.net/resvepro?retryWrites=true&w=majority`) en `.env.production` o en el hosting. Se carga automáticamente cuando `EGW_ENV=production`.
 
 ### Almacenamiento multimedia
 
@@ -100,6 +139,45 @@ En producción, define `MONGODB_URI` en el entorno de despliegue o en `productio
 No se usa disco local (`uploadDir`). El contenido inline se sirve en `GET /media/:id/content`.
 
 En producción, `production.ts` puede leer overrides de `process.env` del proveedor de deploy.
+
+### Supabase (PostgreSQL producción)
+
+Proyecto RESVEPRO usa Supabase **solo como hosting PostgreSQL** (Prisma). No se instala el SDK de Supabase en admin ni mobile.
+
+| Campo | Valor producción |
+|-------|------------------|
+| Host direct | `db.kccmopduvtlrqnlimowx.supabase.co` (**solo IPv6** — suele fallar en Mac/red local) |
+| Host pooler (Session) | `aws-0-<region>.pooler.supabase.com` (**IPv4**, usar este) |
+| Port | `5432` |
+| Database | `postgres` |
+| User direct | `postgres` |
+| User pooler | `postgres.kccmopduvtlrqnlimowx` |
+| Password | Project Settings → Database → **Database password** |
+
+**Error P1001 (`Can't reach database server`)** desde tu Mac: el host `db.*.supabase.co` no tiene IPv4. Solución:
+
+1. Supabase → **Project Settings → Database → Connection string**
+2. Pestaña **Connection pooling** → modo **Session**
+3. Copia la URI y ponla en `egw-api/.env.production` como `DATABASE_URL=...`
+4. Vuelve a ejecutar: `pnpm prisma:migrate:prod`
+
+**Advisor "RLS Disabled in Public":** Supabase avisa si hay tablas en `public` sin Row Level Security (expuestas vía PostgREST). RESVEPRO **no usa** Supabase SDK en admin/mobile; solo Prisma desde la API. La migración `20250703120000_enable_rls_public_schema` activa RLS en todas las tablas públicas (incl. `_prisma_migrations`). El rol `postgres` del pooler sigue accediendo con normalidad; roles `anon`/`authenticated` quedan bloqueados sin policies.
+
+Plantilla: `egw-api/env.production.example` → copia a **`egw-api/.env.production`** (gitignored). Con `EGW_ENV=production`, la API carga ese archivo automáticamente.
+
+**Primera vez contra Supabase:**
+
+```bash
+cd resvepro-api
+# Exporta POSTGRES_PASSWORD (y opcionalmente MONGODB_URI, JWT_*) en tu shell o usa el panel del hosting
+EGW_ENV=production pnpm prisma:migrate:prod
+# Opcional seed inicial:
+# EGW_ENV=production pnpm prisma:seed:prod
+```
+
+**Admin (Firebase):** `VITE_API_URL=https://api-resvepro-app-733997977492.europe-west1.run.app/api/v1` en `.env.production` antes del build (ver `egw-admin/env.production.example`).
+
+**Mobile (build EAS):** define `EXPO_PUBLIC_API_URL=https://tu-api.com/api/v1` en EAS Secrets o `.env` local de build (no commitear).
 
 ## egw-admin — `src/config/environments/`
 
