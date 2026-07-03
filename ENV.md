@@ -58,9 +58,16 @@ Desde la carpeta padre `EGW/`: mismos comandos vía `pnpm dev:all` (delega en do
 | `pnpm prisma:migrate:dev` | `pnpm prisma:migrate:prod` |
 | `pnpm prisma:seed:dev` | `pnpm prisma:seed:prod` |
 
-**Cloud Run (GCP):** el `Dockerfile` usa **pnpm** (`pnpm-lock.yaml`), no npm. Al arrancar ejecuta `prisma migrate deploy` y luego la API.
+**Cloud Run (GCP proyecto `resvepro`):** dos servicios con el mismo código API (`egw-api`):
 
-Variables mínimas en el servicio Cloud Run:
+| Cliente | Servicio Cloud Run | URL base |
+|---------|-------------------|----------|
+| **Mobile** | `api-resvepro-app` | `https://api-resvepro-app-1046799880752.us-west1.run.app/api/v1` |
+| **Admin (web)** | `api-resvepro-web` | `https://api-resvepro-web-1046799880752.us-west1.run.app/api/v1` |
+
+El `Dockerfile` usa **pnpm** (`pnpm-lock.yaml`). Al arrancar ejecuta `prisma migrate deploy` y luego la API.
+
+Variables mínimas en **cada** servicio Cloud Run:
 
 | Variable | Ejemplo |
 |----------|---------|
@@ -68,7 +75,7 @@ Variables mínimas en el servicio Cloud Run:
 | `DATABASE_URL` | URI Session pooler Supabase |
 | `MONGODB_URI` | Atlas `/resvepro` |
 | `JWT_SECRET` / `JWT_REFRESH_SECRET` | secretos fuertes |
-| `CORS_ORIGINS` | `https://resvepro.web.app,https://resvepro.firebaseapp.com` |
+| `CORS_ORIGINS` | En **api-resvepro-web**: `https://resvepro.web.app,https://resvepro.firebaseapp.com` |
 
 Cloud Run inyecta `PORT` (normalmente `8080`); la API lo respeta automáticamente.
 
@@ -169,15 +176,18 @@ Plantilla: `egw-api/env.production.example` → copia a **`egw-api/.env.producti
 
 ```bash
 cd resvepro-api
-# Exporta POSTGRES_PASSWORD (y opcionalmente MONGODB_URI, JWT_*) en tu shell o usa el panel del hosting
 EGW_ENV=production pnpm prisma:migrate:prod
-# Opcional seed inicial:
+# Usuarios/roles seed (opcional):
 # EGW_ENV=production pnpm prisma:seed:prod
+# Biblia RVR1960 — obligatoria en prod (~15–30 min, requiere red):
+pnpm seed:bible:prod
 ```
 
-**Admin (Firebase):** `VITE_API_URL=https://api-resvepro-app-733997977492.europe-west1.run.app/api/v1` en `.env.production` antes del build (ver `egw-admin/env.production.example`).
+**Biblia (común denominador):** colección `biblia`, categoría `biblia`, 66 libros RVR1960 desde `bible-api.deno.dev`. Idempotente: si ya existen 66 libros, no reimporta. Forzar: `pnpm seed:bible:prod -- --force`.
 
-**Mobile (build EAS):** define `EXPO_PUBLIC_API_URL=https://tu-api.com/api/v1` en EAS Secrets o `.env` local de build (no commitear).
+**Admin (Firebase):** `VITE_API_URL=https://api-resvepro-web-1046799880752.us-west1.run.app/api/v1` en `.env.production` antes del build.
+
+**Mobile (EAS):** `EXPO_PUBLIC_API_URL=https://api-resvepro-app-1046799880752.us-west1.run.app/api/v1` en secrets o `.env` de build.
 
 ## egw-admin — `src/config/environments/`
 
