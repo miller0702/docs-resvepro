@@ -39,7 +39,7 @@ erDiagram
 
 | Tabla | Descripción |
 |-------|-------------|
-| `users` | Usuario, email, password hash, nombre, avatar opcional (`avatar_id` → `media_assets`), portada (`cover_id`), foco de portada (`cover_focus_x`, `cover_focus_y`, 0–100), aceptación de términos, estado activo, **`is_official`** (cuenta @resvepro) |
+| `users` | Usuario, email, password hash, nombre, avatar opcional (`avatar_id` → `media_assets`), portada (`cover_id`), foco de portada (`cover_focus_x`, `cover_focus_y`, 0–100), aceptación de términos, estado activo (`is_active`), **`can_post`** (permite publicar en comunidad; default `true`), **`deleted_at`** (cuenta anonimizada/eliminada), **`is_official`** (cuenta @resvepro) |
 | `user_follows` | Grafo social: `follower_id` sigue a `following_id` (PK compuesta) |
 | `study_folders` | Carpetas de estudio por usuario (`parent_id` opcional para anidar) |
 | `study_notes` | Notas de estudio (`folder_id`, `book_id`, `chapter_id` opcionales) |

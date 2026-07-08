@@ -134,6 +134,48 @@ paths:
       responses:
         '200':
           description: Perfil actualizado
+    delete:
+      tags: [Users]
+      security: [{ bearerAuth: [] }]
+      summary: Eliminar cuenta propia (anonimiza datos personales)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, confirm]
+              properties:
+                password:
+                  type: string
+                  minLength: 8
+                confirm:
+                  type: string
+                  description: Debe ser exactamente ELIMINAR
+      responses:
+        '200':
+          description: Cuenta eliminada
+
+  /account/deletion-request:
+    post:
+      tags: [Platform]
+      summary: Solicitud pública de eliminación de cuenta por email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Solicitud registrada
 
   /users/me/avatar:
     post:
@@ -1324,6 +1366,20 @@ paths:
         '200':
           description: Usuario actualizado
 
+  /admin/users/{id}/delete-account:
+    post:
+      tags: [Admin]
+      security: [{ bearerAuth: [] }]
+      summary: Eliminar y anonimizar cuenta de usuario (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Cuenta eliminada
+
   /admin/users/{id}/impersonate:
     post:
       tags: [Admin]
@@ -1789,8 +1845,8 @@ components:
         roles:
           type: array
           items: { type: string }
-
-    CreateRoleDto:
+        canPost: { type: boolean }
+        isActive: { type: boolean }
       type: object
       required: [code, name, permissions]
       properties:

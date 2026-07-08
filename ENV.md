@@ -108,9 +108,38 @@ Si Hosting aún no está activo: [Firebase Console → resvepro → Hosting](htt
 
 La API en Cloud Run debe incluir `https://resvepro.web.app` y `https://resvepro.firebaseapp.com` en `CORS_ORIGINS`.
 
-### egw-mobile
+### egw-mobile (EAS Build)
 
-| `pnpm start:dev` | `pnpm start:prod` |
+| Comando | Descripción |
+|---------|-------------|
+| `pnpm start:dev` | Metro desarrollo (:8003) |
+| `pnpm start:prod` | Metro con config producción |
+| `pnpm build:preview:android` | APK preview → API prod (Cloud Run app) |
+| `pnpm build:preview:ios` | IPA preview (TestFlight interno) |
+
+**Proyecto Expo:** [@miller07/resvepro](https://expo.dev/accounts/miller07/projects/resvepro)
+
+Perfil **`preview`** en `eas.json`:
+- `EGW_ENV=production`
+- `EXPO_PUBLIC_API_URL=https://api-resvepro-app-1046799880752.us-west1.run.app/api/v1`
+- Android: **`buildType: apk`** (instalable directo, sin Play Store)
+
+**Primera vez:**
+
+```bash
+cd resvepro-mobile
+pnpm install
+pnpm exec eas login
+pnpm build:preview:android
+```
+
+EAS genera el keystore Android si no existe. Al terminar, descarga el APK desde el enlace de Expo o:
+
+```bash
+pnpm exec eas build:list --platform android --limit 1
+```
+
+Credencial seed prod: `lector@resvepro.local` / `Lector123!` (si corriste `prisma:seed:prod`).
 
 ## egw-api — `src/config/environments/`
 
