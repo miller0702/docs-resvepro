@@ -33,6 +33,8 @@
 
 \* ADMIN_MODULAR: solo si el permiso está asignado explícitamente en `role_permissions`.
 
+**Personificación (`users:impersonate`):** solo `SUPER_ADMIN` puede personificar, y únicamente hacia cuentas con rol de panel (`SUPER_ADMIN`, `ADMIN_GENERAL`, `ADMIN_MODULAR`). No aplica a lectores (`LECTOR`) de la app móvil.
+
 ## Usuario seed (desarrollo)
 
 | Email | Contraseña | Rol |

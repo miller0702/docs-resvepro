@@ -505,7 +505,12 @@ paths:
     get:
       tags: [Community]
       security: [{ bearerAuth: [] }]
-      summary: Feed de recomendaciones (paginado)
+      summary: Feed de la comunidad (solo seguidos, propias y oficiales)
+      description: >
+        Sin authorId, el feed incluye publicaciones propias, de cuentas a las que el usuario sigue
+        y de perfiles oficiales. Con authorId (p. ej. perfil encontrado en búsqueda) se listan
+        las publicaciones de ese autor sin exigir follow. La búsqueda de personas (/search) sigue
+        siendo global.
       parameters:
         - name: page
           in: query
@@ -809,6 +814,9 @@ paths:
       tags: [Admin, Moderation]
       security: [{ bearerAuth: [] }]
       summary: Listar reportes de moderación (admin)
+      description: >
+        Incluye el campo `target` con el contenido reportado (texto/autor/imágenes de la publicación,
+        comentario, usuario o URL de imagen) para revisarlo en el panel.
       parameters:
         - name: page
           in: query
@@ -1384,7 +1392,10 @@ paths:
     post:
       tags: [Admin]
       security: [{ bearerAuth: [] }]
-      summary: Personificar usuario (solo SUPER_ADMIN)
+      summary: Personificar usuario admin (solo SUPER_ADMIN)
+      description: >
+        Emite tokens JWT como el usuario objetivo. Solo permitido hacia cuentas con rol de panel
+        (SUPER_ADMIN, ADMIN_GENERAL, ADMIN_MODULAR). No se pueden personificar lectores de la app.
       parameters:
         - name: id
           in: path
@@ -1430,6 +1441,22 @@ paths:
       tags: [Users]
       security: [{ bearerAuth: [] }]
       summary: Listado de usuarios (admin)
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, maximum: 100 }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: context
+          in: query
+          schema:
+            type: string
+            enum: [panel, app]
+          description: panel = roles admin; app = solo lectores LECTOR
       responses:
         '200':
           description: Lista paginada
