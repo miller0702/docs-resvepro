@@ -509,8 +509,9 @@ paths:
       description: >
         Sin authorId, el feed incluye publicaciones propias, de cuentas a las que el usuario sigue
         y de perfiles oficiales. Con authorId (p. ej. perfil encontrado en búsqueda) se listan
-        las publicaciones de ese autor sin exigir follow. La búsqueda de personas (/search) sigue
-        siendo global.
+        las publicaciones de ese autor sin exigir follow. Las publicaciones con visibility
+        CONNECTIONS solo son visibles para el autor y su círculo (seguidores o seguidos).
+        La búsqueda de personas (/search) sigue siendo global.
       parameters:
         - name: page
           in: query
@@ -563,6 +564,13 @@ paths:
                   type: array
                   maxItems: 10
                   items: { type: string, format: uuid }
+                visibility:
+                  type: string
+                  enum: [PUBLIC, CONNECTIONS]
+                  default: PUBLIC
+                  description: >
+                    PUBLIC: cualquier lector autenticado. CONNECTIONS: solo el autor y usuarios
+                    con follow en cualquier dirección (seguidores o personas a las que sigue).
       responses:
         '201':
           description: Publicación creada
@@ -1695,10 +1703,13 @@ paths:
   /app/manual:
     get:
       tags: [Platform]
-      summary: Manual de usuario (secciones visibles)
+      summary: Manual de usuario de la app (secciones visibles)
+      description: >
+        Devuelve secciones con audience=APP almacenadas en app_manual_sections.
+        Incluye guías como comunidad (visibilidad Todos/Solo conexiones), descargas, etc.
       responses:
         '200':
-          description: Secciones ordenadas
+          description: Secciones ordenadas (code, audience, title, body, sortOrder)
 
   /app/tutorial:
     get:
@@ -1713,9 +1724,16 @@ paths:
       tags: [Admin]
       security: [{ bearerAuth: [] }]
       summary: Manual de usuario (admin)
+      description: >
+        Lista secciones del manual. Query audience=APP|PANEL|ALL (default ALL).
+        APP se muestra en la app móvil; PANEL en el Manual del panel web.
+      parameters:
+        - name: audience
+          in: query
+          schema: { type: string, enum: [APP, PANEL, ALL], default: ALL }
       responses:
         '200':
-          description: Todas las secciones
+          description: Secciones (incluye audience)
     patch:
       tags: [Admin]
       security: [{ bearerAuth: [] }]

@@ -41,6 +41,18 @@ erDiagram
 |-------|-------------|
 | `users` | Usuario, email, password hash, nombre, avatar opcional (`avatar_id` → `media_assets`), portada (`cover_id`), foco de portada (`cover_focus_x`, `cover_focus_y`, 0–100), aceptación de términos, estado activo (`is_active`), **`can_post`** (permite publicar en comunidad; default `true`), **`deleted_at`** (cuenta anonimizada/eliminada), **`is_official`** (cuenta @resvepro) |
 | `user_follows` | Grafo social: `follower_id` sigue a `following_id` (PK compuesta) |
+
+### Comunidad (MongoDB)
+
+Colecciones en MongoDB (no Prisma). Ver `ENV.md` para la URI.
+
+| Colección | Descripción |
+|-----------|-------------|
+| `community_posts` | Publicaciones del feed: `authorId`, `body`, `kind`, **`visibility`** (`PUBLIC` \| `CONNECTIONS`, default `PUBLIC`), adjuntos, tags, menciones, reacciones, etc. |
+| `community_comments` | Comentarios por `postId` |
+| `community_reactions` | Reacciones por usuario y post |
+
+**Visibilidad:** `PUBLIC` = cualquier lector autenticado; `CONNECTIONS` = autor + usuarios con follow en cualquier dirección hacia el autor. Los documentos legacy sin `visibility` se tratan como `PUBLIC`.
 | `study_folders` | Carpetas de estudio por usuario (`parent_id` opcional para anidar) |
 | `study_notes` | Notas de estudio (`folder_id`, `book_id`, `chapter_id` opcionales) |
 | `highlights` | Citas subrayadas en lectura (`book_id`, `chapter_id`, `excerpt`) |
@@ -96,7 +108,7 @@ erDiagram
 | `app_settings` | Configuración clave-valor (soporte, mantenimiento, versión mínima, **marca/colores**, **seguridad JWT** — solo admin) |
 | `app_sections` | Secciones de la app móvil: títulos, iconos, textos de pestañas y encabezados |
 | `app_drawer_items` | Ítems del menú lateral: grupos, etiquetas, rutas, iconos y orden |
-| `app_manual_sections` | Secciones del manual de usuario en la app |
+| `app_manual_sections` | Secciones del manual (`audience` APP \| PANEL): app móvil y panel web; seed versionado desde `manual-sections.seed.ts` |
 | `app_tutorial_steps` | Pasos del tutorial de bienvenida para usuarios nuevos |
 | `audit_logs` | Auditoría de acciones admin: actor, acción, recurso, resumen, IP, metadata JSON |
 | `moderation_reports` | Reportes de usuarios sobre publicaciones, comentarios, imágenes o perfiles; revisión admin |

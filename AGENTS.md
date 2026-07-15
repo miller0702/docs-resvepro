@@ -29,6 +29,9 @@ No es un monorepo. Cada componente tiene su propio Git, CI/CD y despliegue.
 | [REPOS.md](./REPOS.md) | Clonado local, dependencias entre repos |
 | [ROADMAP.md](./ROADMAP.md) | Estado del MVP y etapas pendientes |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | Commits, flujo multi-repo, calidad |
+| [MANUAL-USUARIO.md](./MANUAL-USUARIO.md) | Índice de manuales para usuarios finales |
+| [MANUAL-USUARIO-APP.md](./MANUAL-USUARIO-APP.md) | Manual de la app móvil (lectores) |
+| [MANUAL-USUARIO-PANEL.md](./MANUAL-USUARIO-PANEL.md) | Manual del panel web (equipo editorial) |
 
 ## Reglas para agentes
 

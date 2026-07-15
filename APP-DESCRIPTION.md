@@ -70,7 +70,7 @@ Elige tema claro, oscuro o automático según tu dispositivo. Ajusta el tamaño 
 Inicia sesión para sincronizar marcadores, progreso de lectura y datos de estudio entre dispositivos. Puedes forzar una sincronización manual desde ajustes. La app está preparada para trabajar con conectividad intermitente.
 
 📖 AYUDA Y SOPORTE
-Consulta el manual de usuario integrado, revisa los términos y la política de privacidad, y envía requerimientos al equipo editorial cuando lo necesites. Todo accesible desde el menú de la aplicación.
+Consulta el manual de usuario integrado (y la versión completa en el repo de documentación: `MANUAL-USUARIO-APP.md`), revisa los términos y la política de privacidad, y envía requerimientos al equipo editorial cuando lo necesites. Todo accesible desde el menú de la aplicación.
 
 🔒 PRIVACIDAD Y CONTROL DE DATOS
 Tu privacidad importa. Consulta la política de privacidad desde la app. Si lo deseas, puedes eliminar tu cuenta y los datos asociados desde Ajustes, o solicitar la eliminación mediante el formulario web oficial indicado en la ficha de la tienda.
