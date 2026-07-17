@@ -1319,10 +1319,75 @@ paths:
     post:
       tags: [Media]
       security: [{ bearerAuth: [] }]
-      summary: Subir archivo multimedia (admin)
+      summary: Subir archivo multimedia inline (≤5 MB)
       responses:
         '201':
           description: Asset creado
+
+  /media/external:
+    post:
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      summary: Registrar URL externa (CDN, YouTube file, GCS ya público)
+      responses:
+        '201':
+          description: Asset EXTERNAL creado
+
+  /media/gcs/status:
+    get:
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      summary: Estado de GCS y límites de subida
+      responses:
+        '200':
+          description: configured, inlineMaxBytes, maxUploadBytes
+
+  /media/gcs/upload-url:
+    post:
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      summary: Obtener URL firmada para subir a GCS (hasta 100 MB)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filename, mimeType, size]
+              properties:
+                filename: { type: string }
+                mimeType: { type: string }
+                size: { type: integer, minimum: 1 }
+                type: { type: string, enum: [COVER, EPUB, PDF, IMAGE, VIDEO, AUDIO, DOCUMENT, OTHER] }
+      responses:
+        '200':
+          description: uploadUrl, objectPath, publicUrl, headers
+        '503':
+          description: GCS no configurado
+
+  /media/gcs/confirm:
+    post:
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      summary: Confirmar objeto en GCS y crear MediaAsset EXTERNAL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [objectPath, filename, mimeType, size]
+              properties:
+                objectPath: { type: string }
+                filename: { type: string }
+                mimeType: { type: string }
+                size: { type: integer, minimum: 1 }
+                type: { type: string, enum: [COVER, EPUB, PDF, IMAGE, VIDEO, AUDIO, DOCUMENT, OTHER] }
+      responses:
+        '201':
+          description: Asset creado
+        '404':
+          description: Objeto aún no existe en GCS
 
   /media/{id}/url:
     get:

@@ -15,7 +15,7 @@
 - [x] Listado ligero de libros (sin blob media en `GET /books`) + `ids` batch + `GET /study/book-ids`
 - [ ] Completar CRUD admin biblioteca
 - [ ] Tests e2e auth + library
-- [ ] Integración GCS producción
+- [x] Integración GCS (signed upload hasta 100 MB)
 
 ## Etapa 3 — Mobile (4–6 semanas)
 
