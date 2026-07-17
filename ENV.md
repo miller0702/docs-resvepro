@@ -148,11 +148,11 @@ Credencial seed prod: `lector@resvepro.local` / `Lector123!` (si corriste `prism
 | `postgres.*` | Conexión PostgreSQL (Render, GCP, etc.) |
 | `jwt.*` | Secretos y expiración de tokens |
 | `corsOrigins` | Orígenes permitidos separados por coma |
-| `gcs.bucket` | Bucket GCS para archivos grandes (videos); vacío = solo inline + URLs externas |
+| `gcs.bucket` | Bucket GCS canónico (`media-resvepro`); vacío = fallback inline local |
 | `gcs.keyFile` | Ruta a JSON de service account (opcional si usas ADC / Cloud Run) |
 | `gcs.publicBaseUrl` | Base pública opcional (CDN). Si vacío: `https://storage.googleapis.com/{bucket}` |
-| `media.inlineMaxBytes` | Tamaño máx. para guardar en base64 en PostgreSQL (default 5 MB) |
-| `media.maxUploadBytes` | Tamaño máx. de subida vía signed URL a GCS (default 100 MB) |
+| `media.inlineMaxBytes` | Fallback sin GCS: máx. base64 en PostgreSQL (default 5 MB) |
+| `media.maxUploadBytes` | Tamaño máx. de subida a GCS (default 100 MB) |
 | `mongodb.uri` | Conexión MongoDB para feed social (posts, comentarios, reacciones) |
 
 ### MongoDB (feed comunitario)
@@ -170,15 +170,21 @@ En producción, define `MONGODB_URI` con base de datos **`/resvepro`** (ej. `...
 
 ### Almacenamiento multimedia
 
-| Tamaño | Estrategia | Endpoint |
-|--------|------------|----------|
-| ≤ `inlineMaxBytes` (5 MB) | Base64 en PostgreSQL | `POST /media/upload` |
-| ≤ `maxUploadBytes` (100 MB) | Subida directa a GCS (URL firmada) | `POST /media/gcs/upload-url` → PUT a GCS → `POST /media/gcs/confirm` |
-| Cualquier URL ya pública | Solo registrar enlace | `POST /media/external` |
+| Destino | Uso |
+|---------|-----|
+| **GCS (`media-resvepro`)** | Almacén canónico de todo el multimedia nuevo |
+| PostgreSQL `media_assets.data` | Solo legado INLINE o fallback si no hay `GCS_BUCKET` |
 
-No se usa disco local (`uploadDir`). El contenido inline se sirve en `GET /media/:id/content`. Los assets GCS quedan como `MediaStorage.EXTERNAL` con URL pública del bucket/CDN.
+| Flujo | Endpoint |
+|--------|----------|
+| Panel (≤ 100 MB) | `POST /media/gcs/upload-url` → PUT → `POST /media/gcs/confirm` |
+| Multipart API (avatars, etc.) | `POST /media/upload` → GCS si está configurado |
+| URL ya pública | `POST /media/external` |
+| Migrar INLINE → GCS | `POST /media/gcs/migrate-inline` `{ "limit": 50 }` |
 
-**CORS del bucket (obligatorio para el panel):** el navegador hace PUT directo a GCS. Archivo listo en el repo:
+**Compresión en el panel:** imágenes &gt; 200 KB → JPEG ~1920 px; videos &gt; 40 MB → compresión suave (1280 px).
+
+**CORS del bucket (obligatorio para el panel):** archivo listo en el repo:
 
 ```bash
 # Desde egw-api (proyecto GCP donde está el bucket)
@@ -195,9 +201,9 @@ gcloud storage buckets add-iam-policy-binding gs://media-resvepro \
   --role=roles/storage.objectViewer
 ```
 
-El service account de Cloud Run (API) necesita `roles/storage.objectAdmin` (o al menos create/get/delete) sobre `media-resvepro`.
+El service account de Cloud Run (API) necesita `roles/storage.objectAdmin` sobre `media-resvepro`.
 
-Variables: `GCS_BUCKET=media-resvepro` (default en development/production). En Cloud Run define `GCS_BUCKET=media-resvepro` si no usas el default del código.
+Variables: `GCS_BUCKET=media-resvepro` (default en development/production).
 
 En producción, `production.ts` puede leer overrides de `process.env` del proveedor de deploy.
 

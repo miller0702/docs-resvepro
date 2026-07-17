@@ -56,7 +56,7 @@ flowchart TB
 | IDs | UUID v4 | Seguridad y distribución |
 | ORM | Prisma | Tipado y migraciones |
 | Auth móvil | JWT Bearer | Estándar Expo |
-| Storage multimedia | Inline ≤5 MB en PostgreSQL + GCS signed upload ≤100 MB + URLs externas | Sin disco en servidor |
+| Storage multimedia | GCS canónico (`media-resvepro`) + metadatos en PostgreSQL; INLINE solo legado | Sin disco en servidor |
 | i18n | No incluido | Plan Oro+ |
 
 ## Flujo de contenido multimedia
@@ -69,7 +69,7 @@ La plataforma replica la experiencia de **EGW Writings** en tres verticales:
 | **Audio / Radio** | Podcasts (estilo Spotify) + emisoras en vivo | `GET /podcasts/series`, `GET /radio/stations` |
 | **Videos** | Catálogo con reproductor (estilo YouTube) | `GET /videos`, `GET /videos/:id` |
 
-Archivos pequeños (≤5 MB) se almacenan inline en PostgreSQL. Videos y archivos de hasta 100 MB se suben con **URL firmada** directo a GCS (`POST /media/gcs/upload-url` → PUT → `POST /media/gcs/confirm`) y quedan como `MediaStorage.EXTERNAL`. También se pueden registrar URLs ya públicas (`POST /media/external`).
+Todo el multimedia nuevo se almacena en **GCS** (`MediaStorage.EXTERNAL`). El panel comprime imágenes y videos grandes antes de subir (signed URL). `POST /media/upload` también escribe en el bucket cuando `GCS_BUCKET` está definido. Los assets INLINE residuales se migran con `POST /media/gcs/migrate-inline`. YouTube sigue sin archivo propio (`sourceType: YOUTUBE`).
 
 ## Rendimiento biblioteca (listado vs detalle)
 

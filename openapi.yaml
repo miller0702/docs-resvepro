@@ -1319,7 +1319,7 @@ paths:
     post:
       tags: [Media]
       security: [{ bearerAuth: [] }]
-      summary: Subir archivo multimedia inline (≤5 MB)
+      summary: Subir archivo multimedia (GCS si está configurado; inline solo fallback)
       responses:
         '201':
           description: Asset creado
@@ -1388,6 +1388,22 @@ paths:
           description: Asset creado
         '404':
           description: Objeto aún no existe en GCS
+
+  /media/gcs/migrate-inline:
+    post:
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      summary: Migrar lote de assets INLINE (Postgres) a GCS
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                limit: { type: integer, default: 50, maximum: 200 }
+      responses:
+        '200':
+          description: Resultado de la migración
 
   /media/{id}/url:
     get:
