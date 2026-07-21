@@ -152,7 +152,7 @@ Credencial seed prod: `lector@resvepro.local` / `Lector123!` (si corriste `prism
 | `gcs.keyFile` | Ruta a JSON de service account (opcional si usas ADC / Cloud Run) |
 | `gcs.publicBaseUrl` | Base pública opcional (CDN). Si vacío: `https://storage.googleapis.com/{bucket}` |
 | `media.inlineMaxBytes` | Fallback sin GCS: máx. base64 en PostgreSQL (default 5 MB) |
-| `media.maxUploadBytes` | Tamaño máx. de subida a GCS (default 100 MB) |
+| `media.maxUploadBytes` | Tope duro de subida a GCS; `0` = sin límite (recomendado) |
 | `mongodb.uri` | Conexión MongoDB para feed social (posts, comentarios, reacciones) |
 
 ### MongoDB (feed comunitario)
@@ -177,12 +177,12 @@ En producción, define `MONGODB_URI` con base de datos **`/resvepro`** (ej. `...
 
 | Flujo | Endpoint |
 |--------|----------|
-| Panel (≤ 100 MB) | `POST /media/gcs/upload-url` → PUT → `POST /media/gcs/confirm` |
+| Panel (cualquier tamaño) | `POST /media/gcs/upload-url` → PUT → `POST /media/gcs/confirm` |
 | Multipart API (avatars, etc.) | `POST /media/upload` → GCS si está configurado |
 | URL ya pública | `POST /media/external` |
 | Migrar INLINE → GCS | `POST /media/gcs/migrate-inline` `{ "limit": 50 }` |
 
-**Compresión en el panel:** imágenes &gt; 200 KB → JPEG ~1920 px; videos &gt; 40 MB → compresión suave (1280 px).
+**Compresión en el panel:** imágenes &gt; 200 KB → JPEG ~1920 px; videos &gt; 15 MB → compresión adaptativa (sin rechazo por tamaño). Guía de costes para admins: ruta `/storage` en egw-admin.
 
 **CORS del bucket (obligatorio para el panel):** archivo listo en el repo:
 

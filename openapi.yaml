@@ -1342,11 +1342,20 @@ paths:
         '200':
           description: configured, inlineMaxBytes, maxUploadBytes
 
+  /media/gcs/usage:
+    get:
+      tags: [Media]
+      security: [{ bearerAuth: [] }]
+      summary: Uso agregado de almacenamiento (barras del panel)
+      responses:
+        '200':
+          description: totalBytes, byType, presupuestos blandos y coste estimado
+
   /media/gcs/upload-url:
     post:
       tags: [Media]
       security: [{ bearerAuth: [] }]
-      summary: Obtener URL firmada para subir a GCS (hasta 100 MB)
+      summary: Obtener URL firmada para subir a GCS (sin límite de tamaño si maxUploadBytes=0)
       requestBody:
         required: true
         content:
