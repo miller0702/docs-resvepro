@@ -1347,9 +1347,12 @@ paths:
       tags: [Media]
       security: [{ bearerAuth: [] }]
       summary: Uso agregado de almacenamiento (barras del panel)
+      description: >
+        Separa bytes en el bucket GCS (facturan) vs URLs externas (seed/enlaces) vs INLINE.
+        estimatedStorageUsdMonth solo contempla gcsBytes.
       responses:
         '200':
-          description: totalBytes, byType, presupuestos blandos y coste estimado
+          description: totalBytes, gcsBytes, remoteUrlBytes, byType, presupuestos y coste estimado
 
   /media/gcs/upload-url:
     post:

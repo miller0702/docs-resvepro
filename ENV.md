@@ -57,6 +57,22 @@ Desde la carpeta padre `EGW/`: mismos comandos vía `pnpm dev:all` (delega en do
 | `pnpm dev` | `pnpm build:prod && pnpm start:prod` |
 | `pnpm prisma:migrate:dev` | `pnpm prisma:migrate:prod` |
 | `pnpm prisma:seed:dev` | `pnpm prisma:seed:prod` |
+| `pnpm docker:up` | — (Cloud Run) |
+
+#### Docker local (desarrollo)
+
+En `egw-api` hay `docker-compose.yml` + `Dockerfile.dev` (hot-reload con volúmenes).
+
+| Comando | Qué levanta |
+|---------|-------------|
+| `pnpm docker:up` | API (:8000) + Mongo 7 (:27017). **Postgres = Render** (`development.ts`) |
+| `pnpm docker:up:db` | Postgres local + Mongo (perfil `local-db`; API con `pnpm dev` o override manual) |
+| `pnpm docker:seed` | Seed contra la DB que use la API (por defecto Render) |
+| `pnpm docker:down` | Detiene servicios (incluye perfil `local-db`) |
+
+Por defecto la API en Compose **no** apunta a Postgres del contenedor: usa el host de Render de `development.ts`. Mongo sí es el del Compose (`MONGODB_URI=mongodb://mongo:27017/resvepro`).
+
+Si el puerto 27017 (o 5432 con `local-db`) ya está ocupado en tu Mac, para esos servicios o cambia el mapeo en `docker-compose.yml`.
 
 **Cloud Run (GCP proyecto `resvepro`):** dos servicios con el mismo código API (`egw-api`):
 
@@ -164,7 +180,7 @@ Posts, comentarios y reacciones viven en **MongoDB** (Mongoose), no en PostgreSQ
 brew services start mongodb-community
 ```
 
-URI por defecto en `development.ts`: `mongodb://127.0.0.1:27017/resvepro`
+URI por defecto en `development.ts`: `mongodb://127.0.0.1:27017/resvepro` (o `mongodb://mongo:27017/resvepro` con Docker Compose).
 
 En producción, define `MONGODB_URI` con base de datos **`/resvepro`** (ej. `...mongodb.net/resvepro?retryWrites=true&w=majority`) en `.env.production` o en el hosting. Se carga automáticamente cuando `EGW_ENV=production`.
 
